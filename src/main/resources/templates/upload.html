@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>文件共享</title>
+
+    <link rel="icon" href="/icon/head.png">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <link href="https://cdn.bootcss.com/Buttons/2.0.0/css/buttons.css" rel="stylesheet">
+    <link href="/css/messenger-theme-air.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/messenger/1.5.0/css/messenger.css" rel="stylesheet">
+
+    <link href="https://cdn.bootcss.com/dropzone/5.5.1/dropzone.css" rel="stylesheet">
+    <link rel="stylesheet"  th:href="@{/css/style.css}" type="text/css">
+</head>
+<style>
+    .file{
+        position: relative;
+
+        overflow: hidden;
+        width: 65%;
+
+        margin-right: auto;
+        margin-left: auto;
+        margin-top: 3%;
+
+    }
+    .filelist{
+        height: 300px;
+        overflow-y: scroll;
+    }
+</style>
+<div style="width: 100% ;height: 20%;text-align: center ;margin-top: 5px">
+    <strong>文件共享,高速传输</strong>
+</div>
+
+
+<div class="file">
+    <div class="showfile">
+        <!-- Default panel contents -->
+        <div class="component">
+
+            <a class="button  button-circle button-tiny "  title="新建文件夹" onclick="create_directory()">
+                <img src="/icon/plus.svg">
+            </a>&nbsp;
+
+
+            <div id="position">
+                当前位置: <br>
+                /<a href="/data">文件首页</a>
+                <span th:each="navigation:${navigation}">
+                   /<a th:text="${navigation.getNavigationName()}" th:href="${navigation.getNavigationPath()}"></a>
+                </span>
+            </div>
+        </div>
+
+        <div class="filelist">
+            <table class="table">
+                <tr>
+                    <th>文件名</th>
+                    <th>上传时间</th>
+                    <th>大小</th>
+
+                    <th>操作</th>
+                </tr>
+
+                <tr th:each="directory:${directoryList}">
+
+                    <!--<td th:if="${directory.isFile()} eq true" >-->
+
+                    <!--<img src="/icon/file.svg" th:text="'&nbsp;' +${directory.getFileName()}">-->
+
+                    <!--</td>-->
+                    <!--th:if="${directory.isFile()} eq false and-->
+                    <td  th:if=" ${#strings.length(directory.getFilePath())==0}" >
+                        <a style="color: #212529;" href="#" th:href="@{'data?path='+${directory.getFileName()}}" th:title=" ${directory.getFileName()} ">
+                            <img src="/icon/folder.svg" th:text="'&nbsp;' + ${directory.getFileName()}">
+                        </a>
+                    </td>
+                    <!--th:if="${directory.isFile()} eq false and-->
+                    <td th:if="${#strings.length(directory.getFilePath())!=0}" >
+                        <a style="color: #212529;" href="#" th:href="@{'data?path='+${directory.getFilePath()} +' '+${directory.getFileName()}}" th:title=" ${directory.getFileName()} ">
+                            <img src="/icon/folder.svg" th:text="'&nbsp;' + ${directory.getFileName()}">
+                        </a>
+                    </td>
+
+                    <td th:text="${directory.getFileDate()}"></td>
+
+                    <!--<td th:if="${directory.isFile()} eq true" th:text="${directory.getFileSize()}"></td>-->
+                    <td th:if="${directory.isFile()} eq false" ></td>
+
+
+
+                    <!--<td th:if="${directory.isFile()} eq true">-->
+                    <!--<a th:href="@{'/' +${pathchild} + '/'+ ${directory.getFileName()}}" th:attr="download=${directory.getFileName()}" class="button  button-circle button-tiny button-wrap" title="下载">-->
+                    <!--<img src="/icon/download-cloud.svg">-->
+                    <!--</a> &nbsp;-->
+
+                    <!--<a th:href="@{'/' +${pathchild} + '/'+ ${directory.getFileName()}}" target="_blank" class="button  button-circle button-tiny button-wrap" title="打开文件">-->
+                    <!--<img src="/icon/book-open.svg">-->
+                    <!--</a> &nbsp;-->
+                    <!--<a href="javascript:;" th:value="'/' +${pathchild} + '/'+ ${directory.getFileName()}" onclick="clipboardtext(this)" class="button  button-circle button-tiny button-wrap fileurl" data-clipboard-text="" title="复制链接">-->
+                    <!--<img src="/icon/clipboard.svg">-->
+                    <!--</a> &nbsp;-->
+                    <!--<a href="javascript:;" th:value=" ${pathchild} + '/'+ ${directory.getFileName()}" onclick="deletefile(this)" class="button  button-circle button-tiny button-wrap" title="删除">-->
+                    <!--<img src="/icon/trash.svg">-->
+                    <!--</a>-->
+                    <!--</td>-->
+                    <!--th:if="${directory.isFile()} eq false"-->
+                    <td >
+                        <a href="javascript:;" th:value=" ${pathchild} + '/'+ ${directory.getFileName()}" onclick="deletefile(this)" class="button  button-circle button-tiny button-wrap" title="删除">
+                            <img src="/icon/trash.svg">
+                        </a>
+                    </td>
+                </tr>
+
+                <tr th:each="file:${fileList}">
+                    <!--th:if="${file.isFile()} eq true"-->
+                    <td>
+
+                        <img src="/icon/file.svg" th:text="'&nbsp;' +${file.getFileName()}">
+
+                    </td>
+                    <!--<td th:if="${file.isFile()} eq false and ${#strings.length(file.getFilePath())==0}" >-->
+                        <!--<a  style="color: #212529;" href="#" th:href="@{'data?path='+${file.getFileName()}}"  th:title=" ${file.getFileName()} ">-->
+                            <!--<img src="/icon/folder.svg" th:text="'&nbsp;' + ${file.getFileName()}">-->
+                        <!--</a>-->
+                    <!--</td>-->
+                    <!--<td th:if="${file.isFile()} eq false and ${#strings.length(file.getFilePath())!=0}" >-->
+                        <!--<a  style="color: #212529;" href="#" th:href="@{'data?path='+${file.getFilePath()} +' '+${file.getFileName()}}"  th:title=" ${file.getFileName()} ">-->
+                            <!--<img src="/icon/folder.svg" th:text="'&nbsp;' + ${file.getFileName()}">-->
+                        <!--</a>-->
+                    <!--</td>-->
+
+                    <td th:text="${file.getFileDate()}"></td>
+                    <!--eq true-->
+                    <td th:if="${file.isFile()} " th:text="${file.getFileSize()}"></td>
+                    <!--<td th:if="${file.isFile()} eq false" ></td>-->
+
+
+                    <!--th:if="${file.isFile()} eq true"-->
+                    <td >
+                        <a th:href="@{'/' +${pathchild} + '/'+ ${file.getFileName()}}" th:attr="download=${file.getFileName()}"  class="button  button-circle button-tiny button-wrap" title="下载">
+                            <img src="/icon/download-cloud.svg">
+                        </a> &nbsp;
+
+                        <a th:href="@{'/' +${pathchild} + '/'+ ${file.getFileName()}}" target="_blank" class="button  button-circle button-tiny button-wrap" title="打开文件">
+                            <img src="/icon/book-open.svg">
+                        </a> &nbsp;
+                        <a href="javascript:;" th:value="'/' +${pathchild} + '/'+ ${file.getFileName()}" onclick="clipboardtext(this)" class="button  button-circle button-tiny button-wrap fileurl"  data-clipboard-text=""    title="复制链接">
+                            <img src="/icon/clipboard.svg">
+                        </a> &nbsp;
+                        <a href="javascript:;" th:value=" ${pathchild} + '/'+ ${file.getFileName()}" onclick="deletefile(this)" class="button  button-circle button-tiny button-wrap" title="删除">
+                            <img src="/icon/trash.svg">
+                        </a>
+                    </td>
+                    <!--<td th:if="${file.isFile()} eq false">-->
+                        <!--<a href="javascript:;" th:value=" ${pathchild} + '/'+ ${file.getFileName()}" onclick="deletefile(this)" class="button  button-circle button-tiny button-wrap" title="删除">-->
+                            <!--<img src="/icon/trash.svg">-->
+                        <!--</a>-->
+                    <!--</td>-->
+                </tr>
+
+
+                <!--<tr>-->
+                    <!--<td><img src="/icon/folder.svg">&nbsp;spider</td>-->
+                    <!--<td>2019.5.5</td>-->
+                    <!--<td>15kb</td>-->
+
+                    <!--<td>-->
+                        <!--<a href="directory/head.png" download="" class="button  button-circle button-tiny button-wrap" title="下载">-->
+                           <!--<img src="/icon/download-cloud.svg">-->
+                        <!--</a> &nbsp;-->
+                        <!--<a href="directory/head.png"  class="button  button-circle button-tiny button-wrap" title="打开文件">-->
+                            <!--<img src="/icon/book-open.svg">-->
+                        <!--</a> &nbsp;-->
+                        <!--<button id="fileurl" class="button  button-circle button-tiny button-wrap fileurl" data-clipboard-text="到时候修改.. " title="复制链接">-->
+                            <!--<img src="/icon/clipboard.svg">-->
+                        <!--</button> &nbsp;-->
+                        <!--<button class="button  button-circle button-tiny button-wrap" title="删除">-->
+                            <!--<img src="/icon/trash.svg">-->
+                        <!--</button>-->
+                    <!--</td>-->
+                <!--</tr>-->
+                <!--<tr>-->
+                   <!--<td> -->
+                        <!--<img src="/css/th.jpeg">-->
+                   <!--</td>-->
+                <!--</tr>-->
+            </table>
+        </div>
+    </div>
+
+
+    </div>
+    <div id="upload" >
+        <label>添加文件</label>
+
+        <form id = "drop-file" action="/upload"
+              class="dropzone"></form>
+
+    </div>
+
+    <br>
+    <div id="chat">
+        聊天
+    </div>
+</div>
+
+<footer th:text="'访问量:' + ${visitorVolume} ">
+
+</footer>
+
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+<!--<script src="https://unpkg.com/feather-icons"></script>-->
+<!--<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>-->
+<script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://cdn.bootcss.com/clipboard.js/2.0.4/clipboard.js"></script>
+<script src="https://cdn.bootcss.com/messenger/1.5.0/js/messenger.js"></script>
+<script src="https://cdn.bootcss.com/messenger/1.5.0/js/messenger-theme-flat.js"></script>
+<script src="https://cdn.bootcss.com/dropzone/5.5.1/dropzone.js"></script>
+
+<script>
+    // feather.replace()
+
+
+    function create_directory() {
+        Messenger().hideAll()
+
+        var  directory_name = prompt("新建文件夹(文件夹名不能含有空格)","请输入文件夹名");
+        var data = {'directory_name':directory_name};
+        if(directory_name){
+            if(directory_name.indexOf(" ")==-1)
+            {
+                $.ajax({
+                    type:'POST',
+                    data:data,
+                    url:"/createdirectory",
+                    success:function (data) {
+                        if(data == 'True')
+                        {
+                            Messenger().post({
+                                message : directory_name+" 目录已创建",
+                                // hideAfter: 10
+                            })
+                            setTimeout(function () {
+                                window.location.reload()
+                            },1000)
+                        }
+                    },
+                    error:function () {
+                        Messenger().post({
+                            message : '目录创建失败',
+                            type:'error'
+                            // hideAfter: 10
+                        })
+                    }
+                })
+            }
+            else{
+                Messenger().post({
+                    message : '文件夹名不能含有空格,请重新添加!',
+                    type:'error'
+                })
+            }
+        }
+        else
+        {
+            Messenger().post({
+                message : '文件夹未添加!',
+                type:'error'
+                // hideAfter: 10
+            })
+
+        }
+    }
+
+
+    function deletefile(arg) {
+        var path = arg.getAttribute('value')
+        var data = {'path':path}
+        console.log(path)
+        if(window.confirm("确定删除该文件吗??"))
+        {
+            $.ajax({
+                type:"POST",
+                url :"/delete",
+                data:data,
+                success:function (data) {
+                    if(data == 'True')
+                    {
+                        Messenger().post({
+                            message : "文件已删除",
+                            // hideAfter: 10
+                        })
+                        setTimeout(function () {
+                            window.location.reload()
+                        },1000)
+                    }
+                    else
+                    {
+                        Messenger().post({
+                            tyepe:"error",
+                            message : "文件删除错误",
+                            // hideAfter: 10
+                        })
+                        // setTimeout(function () {
+                        //     window.location.reload()
+                        // },1000)
+                    }
+                }
+            })
+        }
+        else
+            Messenger().post({
+                message : "文件未删除",
+                // hideAfter: 10
+            })
+
+    }
+
+
+    Dropzone.autoDiscover = false;
+
+    $("#drop-file").dropzone({
+        url: "/upload",
+        maxFilesize: 300,
+
+        dictDefaultMessage: "拖拽或点击上传",
+        dictFileTooBig:"文件过大啦,换个小的",
+
+        init: function () {
+            this.on('success',function (file) {
+                var filename = file.name
+                Messenger().post({
+                    message : filename + "上传成功",
+                    // hideAfter: 10
+                })
+                setTimeout(function () {
+                    window.location.reload()
+                },1000)
+            })
+        }
+
+    })
+
+</script>
+<script>
+
+    Messenger.options = {
+        extraClasses: 'messenger-fixed messenger-on-top',
+        theme: 'air'
+    }
+    function cliptips() {
+        Messenger().post({
+            message: "复制成功",
+            hideAfter: 2,
+            id: "Only-one-message"
+        });
+
+    }
+
+
+    function clipboardtext(e)
+    {
+        var url = window.location.host  + e.getAttribute('value')
+        e.setAttribute('data-clipboard-text',url)
+    }
+
+    var clipboard = new ClipboardJS('.fileurl');
+    clipboard.on('success', function(e) {
+        console.log(e);
+        cliptips();
+        e.clearSelection();
+
+    });
+    clipboard.on('error', function(e) {
+        console.log(e);
+    });
+
+
+</script>
+</body>
+</html>
